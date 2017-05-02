@@ -1,0 +1,7 @@
+{
+  "lambda": {
+    "role": "communicaire-bot-executor",
+    "name": "communicaire-bot",
+    "region": "us-east-1"
+  }
+}
