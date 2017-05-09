@@ -11,15 +11,14 @@ const lexResponse = require("../helper/responseBuilder");
  */
 
 let onBoardPrompt = 
-`Would you like to access?
-please type :
-
-1. policies for Company policies
-2. info Company information
-3. contract Employee contract details
-4. operation Operations checklist
-5. guide New employee best practice guide
-6. introduction Enter new employee induction & orientation
+`Would you like to access?\\n
+please type :\\n
+\\n1. policies for Company policies
+\\n2. info Company information
+\\n3. contract Employee contract details
+\\n4. operation Operations checklist
+\\n5. guide New employee best practice guide
+\\n6. introduction Enter new employee induction & orientation
 `;
 
 exports.dialog = function (intentRequest, callback) {
