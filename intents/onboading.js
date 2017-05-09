@@ -2,6 +2,7 @@
 
 
 const lexResponse = require("../helper/responseBuilder");
+const onboardDataInfo = require("../data/onboardInfo")
 
 // --------------- Functions that control the bot's behavior -----------------------
 
@@ -11,15 +12,16 @@ const lexResponse = require("../helper/responseBuilder");
  */
 
 let onBoardPrompt = 
-`Would you like to access?\\n
-please type :\\n
-\\n1. policies for Company policies
-\\n2. info Company information
-\\n3. contract Employee contract details
-\\n4. operation Operations checklist
-\\n5. guide New employee best practice guide
-\\n6. introduction Enter new employee induction & orientation
+`Would you like to access?
+please type :
+1. policies for Company policies
+2. info for Company information
+3. contract for Employee contract details
+4. operation for Operations checklist
+5. guide for New employee best practice guide
+6. introduction for Enter new employee induction & orientation
 `;
+
 
 exports.dialog = function (intentRequest, callback) {
     
@@ -54,8 +56,8 @@ exports.dialog = function (intentRequest, callback) {
             return;
         }
 
-        callback(lexResponse.delegate(null, intentRequest.currentIntent.slots));
-        return;
+        // callback(lexResponse.delegate(null, intentRequest.currentIntent.slots));
+        // return;
     }
 
     // Order the flowers, and rely on the goodbye message of the bot to define the message to the end user.  In a real bot, this would likely involve a call to a backend service.
@@ -64,13 +66,19 @@ exports.dialog = function (intentRequest, callback) {
 }
 
 function getRuleValue(rulesType) {
-    const companyRuleMap = gCdata;
+    const companyRuleMap = onboardDataInfo;
     return companyRuleMap[rulesType.toLowerCase().replace(/[ ]/g,'_')];
 }
 
 function validateOnBoarding(RulesType) {
     if (RulesType && !getRuleValue(RulesType)) {
-        return lexResponse.buildValidationResult(false, 'GQ', 'I did not recognize that, we have rules about Benefits, Dress code, Company Policy or Holiday');
+        return lexResponse.buildValidationResult(false, 'OnBoadoardInfo', 'I did not recognize that,please type one of the following :' + `
+1. policies for Company policies
+2. info for Company information
+3. contract for Employee contract details
+4. operation for Operations checklist
+5. guide for New employee best practice guide
+6. introduction for Enter new employee induction & orientation`);
     }
     
     return lexResponse.buildValidationResult(true, null, null);
