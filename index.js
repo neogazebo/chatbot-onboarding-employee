@@ -9,6 +9,7 @@
 // const docClient = new AWS.DynamoDB.DocumentClient();
 
 const guestMode = require("./intents/guestMode");
+const greeting = require("./intents/greeting");
 
 // --------------- Intents -----------------------
 
@@ -22,7 +23,7 @@ function dispatch(intentRequest, callback) {
 
     // Dispatch to your skill's intent handlers
     if (intentName === 'Greetings') {
-        return guestMode.dialog(intentRequest, callback);
+        return greeting.dialog(intentRequest, callback);
     }
     throw new Error(`Intent with name ${intentName} not supported`);
 }
