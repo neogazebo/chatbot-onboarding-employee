@@ -8,8 +8,14 @@
 
 // const docClient = new AWS.DynamoDB.DocumentClient();
 
+
+//------------------- intents module  --------------
+
 const guestMode = require("./intents/guestMode");
 const greeting = require("./intents/greeting");
+const onboard = require("./intents/onboading");
+
+const intentsAvailableMap = {Greetings : greeting, OnBoarding: onboard};
 
 // --------------- Intents -----------------------
 
@@ -22,8 +28,10 @@ function dispatch(intentRequest, callback) {
     const intentName = intentRequest.currentIntent.name;
 
     // Dispatch to your skill's intent handlers
-    if (intentName === 'Greetings') {
-        return greeting.dialog(intentRequest, callback);
+    let intenstsAvailable = intentsAvailableMap[intentName];
+
+    if (intenstsAvailable) {
+        return intenstsAvailable.dialog(intentRequest, callback);
     }
     throw new Error(`Intent with name ${intentName} not supported`);
 }
