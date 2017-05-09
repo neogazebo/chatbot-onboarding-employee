@@ -21,7 +21,7 @@ function dispatch(intentRequest, callback) {
     const intentName = intentRequest.currentIntent.name;
 
     // Dispatch to your skill's intent handlers
-    if (intentName === 'GuestMode') {
+    if (intentName === 'Greetings') {
         return guestMode.dialog(intentRequest, callback);
     }
     throw new Error(`Intent with name ${intentName} not supported`);
