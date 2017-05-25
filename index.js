@@ -15,7 +15,16 @@ const guestMode = require("./intents/guestMode");
 const greeting = require("./intents/greeting");
 const onboard = require("./intents/onboading");
 
-const intentsAvailableMap = {Greetings : greeting, OnBoarding: onboard};
+const intentsAvailableMap = {
+    Greetings : {
+        name : greeting,
+        login : true
+    }, 
+    OnBoarding: {
+        name : onboard,
+        login : true
+    }
+};
 
 // --------------- Intents -----------------------
 
