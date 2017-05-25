@@ -17,11 +17,11 @@ const onboard = require("./intents/onboading");
 
 const intentsAvailableMap = {
     Greetings : {
-        name : greeting,
+        handler : greeting,
         login : true
     }, 
     OnBoarding: {
-        name : onboard,
+        handler : onboard,
         login : true
     }
 };
@@ -37,7 +37,7 @@ function dispatch(intentRequest, callback) {
     const intentName = intentRequest.currentIntent.name;
 
     // Dispatch to your skill's intent handlers
-    let intenstsAvailable = intentsAvailableMap[intentName];
+    let intenstsAvailable = intentsAvailableMap.[intentName];
 
     if (intenstsAvailable) {
         return intenstsAvailable.dialog(intentRequest, callback);
