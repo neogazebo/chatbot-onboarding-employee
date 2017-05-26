@@ -34,17 +34,23 @@ const intentsAvailableMap = {
  */
 function dispatch(intentRequest, callback) {
     console.log(`dispatch userId=${intentRequest.userId}, intentName=${intentRequest.currentIntent.name}`);
+    const sessionAttributes = intentRequest.sessionAttributes || {};
 
-    // const sessionAttributes = intentRequest.sessionAttributes || {};
-    const sessionAttributes = intentRequest.sessionAttributes || 
-    {
-        employee : 
-        {
-            name : "febri pratama",
-            id: 1,
-            company_id: 1
-        }
+    /** testing purpose, dont forget to remove */
+
+    let exmp_employee = {
+        name : 'febri pratama',
+        id: 1,
+        company_id: 1
     };
+
+    let employee = sessionAttributes.employee ? JSON.parse(sessionAttributes.employee) : exmp_employee;
+
+    /**  testing purpose end */
+     
+    // uncomment this after testing
+    // let employee = sessionAttributes.employee ? JSON.parse(sessionAttributes.employee) : null;
+    
 
     const intentName = intentRequest.currentIntent.name;
 
@@ -53,10 +59,10 @@ function dispatch(intentRequest, callback) {
 
     if(intenstsAvailable.login === true)
     {
-        if(typeof sessionAttributes.employee != "undefined")
+        if(employee !== false)
         {
             if (intenstsAvailable.handler) {
-                return intenstsAvailable.handler.dialog(intentRequest, callback);
+                return intenstsAvailable.handler.dialog(intentRequest, employee, callback);
             }
         }
         else
