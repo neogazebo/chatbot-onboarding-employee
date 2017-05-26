@@ -14,6 +14,7 @@
 const guestMode = require("./intents/guestMode");
 const greeting = require("./intents/greeting");
 const onboard = require("./intents/onboading");
+const lexResponse = require("./helper/responseBuilder");
 
 const intentsAvailableMap = {
     Greetings : {
@@ -34,48 +35,44 @@ const intentsAvailableMap = {
 function dispatch(intentRequest, callback) {
     console.log(`dispatch userId=${intentRequest.userId}, intentName=${intentRequest.currentIntent.name}`);
 
+    // const sessionAttributes = intentRequest.sessionAttributes || {};
+    const sessionAttributes = intentRequest.sessionAttributes || 
+    {
+        employee : 
+        {
+            name : "febri pratama",
+            id: 1,
+            company_id: 1
+        }
+    };
+
     const intentName = intentRequest.currentIntent.name;
 
     // Dispatch to your skill's intent handlers
-    let intenstsAvailable = intentsAvailableMap.[intentName];
+    let intenstsAvailable = intentsAvailableMap[intentName];
 
-    if (intenstsAvailable) {
-        return intenstsAvailable.dialog(intentRequest, callback);
+    if(intenstsAvailable.login === true)
+    {
+        if(typeof sessionAttributes.employee != "undefined")
+        {
+            if (intenstsAvailable.handler) {
+                return intenstsAvailable.handler.dialog(intentRequest, callback);
+            }
+        }
+        else
+        {
+            callback(lexResponse.close(intentRequest.sessionAttributes, 'Fulfilled',{ contentType: 'PlainText', content: 'please login first' }));
+        }
     }
+    else
+    {
+        if (intenstsAvailable.handler) {
+                return intenstsAvailable.handler.dialog(intentRequest, callback);
+        }
+    }
+
     throw new Error(`Intent with name ${intentName} not supported`);
 }
-
-// function getRulesByCompanyId(userId, callback) {
-//     var employeeStatement = {
-//             TableName: 'Employee',
-//             KeyConditionExpression: 'EmployeeId = :empID',
-//             ExpressionAttributeValues: {
-//                 ':empID': userId
-//         }
-//     };
-
-//     docClient.query(employeeStatement, (err, data) => {
-//         if (err) throw err;
-
-//         var companyName = data.Count > 0 ? data.Items[0].CompanyName: "A";
-
-//         var companyStatement = {
-//             TableName: 'CompanyRules',
-//             KeyConditionExpression: 'CompanyName = :compName',
-//             ExpressionAttributeValues: {
-//                 ':compName': companyName
-//             }
-//         };
-
-//         docClient.query(companyStatement, (err, data) => {
-//             if (err) throw err;
-//             if(data.Count > 0)
-//             {
-//                 callback(null, data.Items[0]);
-//             }
-//         });
-//     });    
-// };
 
 
 
