@@ -2,7 +2,8 @@
 
 
 const lexResponse = require("../helper/responseBuilder");
-const onboardDataInfo = require("../data/onboardInfo")
+const onboardDataInfo = require("../data/onboardInfo");
+const db = require('../config/db')
 
 // --------------- Functions that control the bot's behavior -----------------------
 
@@ -11,19 +12,19 @@ const onboardDataInfo = require("../data/onboardInfo")
  *
  */
 
-let onBoardPrompt = 
-`Would you like to access?
-please type :
-1. policies for Company policies
-2. info for Company information
-3. contract for Employee contract details
-4. operation for Operations checklist
-5. guide for New employee best practice guide
-6. introduction for Enter new employee induction & orientation
-`;
+let onBoardPrompt = (data) => {
+    let promptMessage = `Would you like to access?
+please type`;
+    
+    for(let i = 1; i >= data.length; i++)
+    {
+        promptMessage =+`${data[i-1].key} for ${data[i-1].sort_desc}`;
+    }
 
+    return promptMessage;
+};
 
-exports.dialog = function (intentRequest, callback) {
+exports.dialog = function (intentRequest, employee, callback) {
     
     const companyRules = intentRequest.currentIntent.slots.OnBoadoardInfo;
     const source = intentRequest.invocationSource;
@@ -46,13 +47,19 @@ exports.dialog = function (intentRequest, callback) {
         }
 
         if (!companyRules) {
-            callback(lexResponse.elicitSlot(
-                intentRequest.sessionAttributes, 
-                intentRequest.currentIntent.name,
-                intentRequest.currentIntent.slots,
-                 "OnBoadoardInfo",
-                { contentType: 'PlainText', content: onBoardPrompt }
-            ));
+            getOnboardingList(1, (results) => {
+                console.log(results);
+                if(results!==null)
+                {
+                    callback(lexResponse.elicitSlot(
+                    intentRequest.sessionAttributes, 
+                    intentRequest.currentIntent.name,
+                    intentRequest.currentIntent.slots,
+                    "OnBoadoardInfo",
+                    { contentType: 'PlainText', content: employee.company_id }
+                    ));
+                }
+            });
             return;
         }
 
@@ -60,7 +67,6 @@ exports.dialog = function (intentRequest, callback) {
         // return;
     }
 
-    // Order the flowers, and rely on the goodbye message of the bot to define the message to the end user.  In a real bot, this would likely involve a call to a backend service.
     callback(lexResponse.close(intentRequest.sessionAttributes, 'Fulfilled',
     { contentType: 'PlainText', content: `${companyRules} : ` + getRuleValue(companyRules) }));
 }
@@ -82,4 +88,16 @@ function validateOnBoarding(RulesType) {
     }
     
     return lexResponse.buildValidationResult(true, null, null);
+}
+
+function getOnboardingList(data, callback)
+{
+    db.connection.getConnection( (err, connection) => {
+        let statement = 'select `key`, `sort_desc` from onboarding where is_active = 1 and company_id = ?';
+        connection.query(statement, [data], (error, results, fields) => {
+            if (error) throw error;
+            callback(results);
+            connection.release();
+        });
+    });
 }
