@@ -23,7 +23,7 @@ please type :
 `;
 
 
-exports.dialog = function (intentRequest, callback) {
+exports.dialog = function (intentRequest, employee, callback) {
     
     const companyRules = intentRequest.currentIntent.slots.OnBoadoardInfo;
     const source = intentRequest.invocationSource;
