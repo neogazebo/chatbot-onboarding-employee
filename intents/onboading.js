@@ -2,7 +2,6 @@
 
 
 const lexResponse = require("../helper/responseBuilder");
-const onboardDataInfo = require("../data/onboardInfo");
 const db = require('../config/db')
 
 // --------------- Functions that control the bot's behavior -----------------------
@@ -12,13 +11,11 @@ const db = require('../config/db')
  *
  */
 
-let onBoardPrompt = (data) => {
-    let promptMessage = `Would you like to access?
-please type`;
-    
-    for(let i = 1; i >= data.length; i++)
+let onBoardPrompt = (data, message) => {
+    let promptMessage = message+ '\n';
+    for(let i = 1; i <= data.length; i++)
     {
-        promptMessage =+`${data[i-1].key} for ${data[i-1].sort_desc}`;
+        promptMessage += `${data[i-1].key} for ${data[i-1].sort_desc}.\n`;
     }
 
     return promptMessage;
@@ -29,36 +26,49 @@ exports.dialog = function (intentRequest, employee, callback) {
     const companyRules = intentRequest.currentIntent.slots.OnBoadoardInfo;
     const source = intentRequest.invocationSource;
     const userId = intentRequest.userId;
+    const sessionAttributes = intentRequest.sessionAttributes || {};
+    sessionAttributes.employee = JSON.stringify(employee);
 
     if (source === 'DialogCodeHook') {
     // Perform basic validation on the supplied input slots.  Use the elicitSlot dialog action to re-prompt for the first violation detected.
         const slots = intentRequest.currentIntent.slots;
-        const validationResult = validateOnBoarding(companyRules);
-        if (!validationResult.isValid) {
-            slots[`${validationResult.violatedSlot}`] = null;
-            callback(lexResponse.elicitSlot(
-                intentRequest.sessionAttributes, 
-                intentRequest.currentIntent.name,
-                slots, 
-                validationResult.violatedSlot, 
-                validationResult.message
-            ));
+        
+        if (companyRules) {
+            let validationResult = lexResponse.buildValidationResult(true, null, null);
+            getOnboardingValue({company_id:employee.company_id, key:companyRules}, (results) => {
+                if(results===null){
+                    console.log(results);
+                    getOnboardingList(employee.company_id, (results) => {
+                        validationResult =  lexResponse.buildValidationResult(false, 'OnBoadoardInfo', onBoardPrompt(results, 'I did not recognize that, please type one of the following : '));
+                        slots[`${validationResult.violatedSlot}`] = null;
+                        callback(lexResponse.elicitSlot(
+                            sessionAttributes, 
+                            intentRequest.currentIntent.name,
+                            slots, 
+                            validationResult.violatedSlot, 
+                            validationResult.message
+                        ));
+                    });
+                }
+                else
+                {
+                    callback(lexResponse.close(intentRequest.sessionAttributes, 'Fulfilled',
+                    { contentType: 'PlainText', content: `${companyRules} : ${results}` }));
+                }
+            });
             return;
         }
 
         if (!companyRules) {
-            getOnboardingList(1, (results) => {
-                console.log(results);
-                if(results!==null)
-                {
-                    callback(lexResponse.elicitSlot(
-                    intentRequest.sessionAttributes, 
+            getOnboardingList(employee.company_id, (results) => {
+                onBoardPrompt(results);
+                callback(lexResponse.elicitSlot(
+                    sessionAttributes,
                     intentRequest.currentIntent.name,
                     intentRequest.currentIntent.slots,
                     "OnBoadoardInfo",
-                    { contentType: 'PlainText', content: employee.company_id }
-                    ));
-                }
+                    { contentType: 'PlainText', content: onBoardPrompt(results, 'Would you like to access? please type :') }
+                ));
             });
             return;
         }
@@ -68,36 +78,27 @@ exports.dialog = function (intentRequest, employee, callback) {
     }
 
     callback(lexResponse.close(intentRequest.sessionAttributes, 'Fulfilled',
-    { contentType: 'PlainText', content: `${companyRules} : ` + getRuleValue(companyRules) }));
+    { contentType: 'PlainText', content: 'done' }));
 }
 
-function getRuleValue(rulesType) {
-    const companyRuleMap = onboardDataInfo;
-    return companyRuleMap[rulesType.toLowerCase().replace(/[ ]/g,'_')];
-}
-
-function validateOnBoarding(RulesType) {
-    if (RulesType && !getRuleValue(RulesType)) {
-        return lexResponse.buildValidationResult(false, 'OnBoadoardInfo', 'I did not recognize that,please type one of the following :' + `
-1. policies for Company policies
-2. info for Company information
-3. contract for Employee contract details
-4. operation for Operations checklist
-5. guide for New employee best practice guide
-6. introduction for Enter new employee induction & orientation`);
-    }
-    
-    return lexResponse.buildValidationResult(true, null, null);
-}
-
-function getOnboardingList(data, callback)
-{
+let getOnboardingList = (data, callback) => {
     db.connection.getConnection( (err, connection) => {
         let statement = 'select `key`, `sort_desc` from onboarding where is_active = 1 and company_id = ?';
         connection.query(statement, [data], (error, results, fields) => {
             if (error) throw error;
-            callback(results);
             connection.release();
+            callback(results);
+        });
+    });
+}
+
+let getOnboardingValue = (data, callback) => {
+    db.connection.getConnection( (err, connection) => {
+        let statement = 'select `value` from onboarding where is_active = 1 and company_id = ? and `key` = ? limit 1';
+        connection.query(statement, [data.company_id, data.key], (error, results, fields) => {
+            if (error) throw error;
+            connection.release();
+            callback(results.length > 0 ? results[0].value : null);
         });
     });
 }

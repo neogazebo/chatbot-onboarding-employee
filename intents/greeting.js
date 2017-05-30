@@ -11,6 +11,4 @@ exports.dialog = function(intentRequest, employee, callback) {
     // if (source === 'DialogCodeHook') {
         callback(lexResponse.close(sessionAttributes, 'Fulfilled',
         { contentType: 'PlainText', content: `Hi ${employee.name}, What are you here to do? Onboard / Train / Engage Survey / Ask a question`}));
-        // { contentType: 'PlainText', content: `Hi, What are you here to do? Onboard / Train / Engage Survey / Ask a question`}));
-    // }
 }
