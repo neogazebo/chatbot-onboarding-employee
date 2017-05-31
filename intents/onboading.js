@@ -21,6 +21,25 @@ let onBoardPrompt = (data, message) => {
     return promptMessage;
 };
 
+let onboardClientSession = (data, message, image) => {
+
+    let result = {};
+    let buttons = [];
+    result.message = message;
+    result.image = (typeof image !== 'undefined') ?  image : null;
+
+    for(let i = 1; i <= data.length; i++)
+    {
+        buttons.push({
+            text : data[i - 1].sort_desc,
+            value : data[i - 1].key
+        })
+    }
+    result.buttons = buttons;
+
+    return result;
+};
+
 exports.dialog = function (intentRequest, employee, callback) {
     
     const companyRules = intentRequest.currentIntent.slots.OnBoadoardInfo;
@@ -37,8 +56,8 @@ exports.dialog = function (intentRequest, employee, callback) {
             let validationResult = lexResponse.buildValidationResult(true, null, null);
             getOnboardingValue({company_id:employee.company_id, key:companyRules}, (results) => {
                 if(results===null){
-                    console.log(results);
                     getOnboardingList(employee.company_id, (results) => {
+                        sessionAttributes.client = JSON.stringify(onboardClientSession(results, 'I did not recognize that, please type one of the following : '));
                         validationResult =  lexResponse.buildValidationResult(false, 'OnBoadoardInfo', onBoardPrompt(results, 'I did not recognize that, please type one of the following : '));
                         slots[`${validationResult.violatedSlot}`] = null;
                         callback(lexResponse.elicitSlot(
@@ -61,7 +80,8 @@ exports.dialog = function (intentRequest, employee, callback) {
 
         if (!companyRules) {
             getOnboardingList(employee.company_id, (results) => {
-                onBoardPrompt(results);
+                // onBoardPrompt(results);
+                sessionAttributes.client = JSON.stringify(onboardClientSession(results, 'Would you like to access? please type :'));
                 callback(lexResponse.elicitSlot(
                     sessionAttributes,
                     intentRequest.currentIntent.name,

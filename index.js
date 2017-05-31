@@ -59,7 +59,7 @@ function dispatch(intentRequest, callback) {
 
     if(intenstsAvailable.login === true)
     {
-        if(employee !== false)
+        if(employee !== null)
         {
             if (intenstsAvailable.handler) {
                 return intenstsAvailable.handler.dialog(intentRequest, employee, callback);
