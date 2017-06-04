@@ -105,7 +105,7 @@ let onboardingData = (company_id, callback) => {
         TableName: 'orlito_onboarding',
         KeyConditionExpression: 'company_id = :company_id',
         ExpressionAttributeValues: {
-            ':company_id': company_id
+            ':company_id': parseInt(company_id)
         }
     };
 
