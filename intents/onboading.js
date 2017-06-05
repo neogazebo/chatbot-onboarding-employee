@@ -59,9 +59,10 @@ exports.dialog = function (intentRequest, employee, callback) {
             let validationResult = validateOnBoarding(companyRules, result);
 
             if (!validationResult.isValid) {
+                sessionAttributes.client = JSON.stringify(onboardClientSession(result, 'I did not recognize that, please type one of the following :'));
                 slots[`${validationResult.violatedSlot}`] = null;
                 callback(lexResponse.elicitSlot(
-                    intentRequest.sessionAttributes,
+                    sessionAttributes,
                     intentRequest.currentIntent.name,
                     slots,
                     validationResult.violatedSlot,
