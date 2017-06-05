@@ -35,7 +35,10 @@ const intentsAvailableMap = {
 function dispatch(intentRequest, callback) {
     console.log(`dispatch userId=${intentRequest.userId}, intentName=${intentRequest.currentIntent.name}`);
     const sessionAttributes = intentRequest.sessionAttributes || {};
-
+    if(typeof sessionAttributes.client != undefined)
+    {
+        delete sessionAttributes.client;
+    }
     /** testing purpose, dont forget to remove */
 
     let exmp_employee = {
