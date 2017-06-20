@@ -53,6 +53,7 @@ exports.dialog = function (intentRequest, employee, callback) {
     sessionAttributes.employee = JSON.stringify(employee);
 
     onboardingData(employee.company_id, (result) => {
+        console.log(result);
         if (source === 'DialogCodeHook') {
             // Perform basic validation on the supplied input slots.  Use the elicitSlot dialog action to re-prompt for the first violation detected.
             const slots = intentRequest.currentIntent.slots;
